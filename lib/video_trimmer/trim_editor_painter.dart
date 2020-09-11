@@ -88,7 +88,7 @@ class TrimEditorPainter extends CustomPainter {
     @required this.endPos,
     @required this.scrubberAnimationDx,
     this.circleSize = 0.5,
-    this.borderWidth = 5,
+    this.borderWidth = 12,
     this.scrubberWidth = 1,
     this.showScrubber = true,
     this.borderPaintColor = Colors.white,
@@ -113,11 +113,12 @@ class TrimEditorPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    var circlePaint = Paint()
-      ..color = circlePaintColor
-      ..strokeWidth = 1
-      ..style = PaintingStyle.fill
-      ..strokeCap = StrokeCap.round;
+//    var circlePaint = Paint()
+//      ..color = circlePaintColor
+////      ..strokeWidth = 1
+//      ..strokeWidth = 5
+//      ..style = PaintingStyle.fill
+//      ..strokeCap = StrokeCap.round;
 
     var scrubberPaint = Paint()
       ..color = scrubberPaintColor
@@ -129,19 +130,19 @@ class TrimEditorPainter extends CustomPainter {
 
     if (showScrubber) {
       if (scrubberAnimationDx.toInt() > startPos.dx.toInt()) {
-        canvas.drawLine(
-          Offset(scrubberAnimationDx, 0),
-          Offset(scrubberAnimationDx, 0) + Offset(0, endPos.dy),
-          scrubberPaint,
-        );
+//        canvas.drawLine(
+//          Offset(scrubberAnimationDx, 0),
+//          Offset(scrubberAnimationDx, 0) + Offset(0, endPos.dy),
+//          scrubberPaint,
+//        );
       }
     }
 
     canvas.drawRect(rect, borderPaint);
-    canvas.drawCircle(
-        startPos + Offset(0, endPos.dy / 2), circleSize, circlePaint);
-    canvas.drawCircle(
-        endPos + Offset(0, -endPos.dy / 2), circleSize, circlePaint);
+//    canvas.drawCircle(
+//        startPos + Offset(0, endPos.dy / 2), circleSize, circlePaint);
+//    canvas.drawCircle(
+//        endPos + Offset(0, -endPos.dy / 2), circleSize, circlePaint);
   }
 
   @override

@@ -162,11 +162,11 @@ class TrimEditor extends StatefulWidget {
     @required this.viewerHeight,
     this.fit = BoxFit.fitHeight,
     this.maxVideoLength = const Duration(milliseconds: 0),
-    this.circleSize = 5.0,
+    this.circleSize = 10.0,
     this.circleSizeOnDrag = 8.0,
     this.circlePaintColor = Colors.blue,
-    this.borderPaintColor = Colors.red,
-    this.scrubberPaintColor = Colors.white,
+    this.borderPaintColor = Colors.blue,
+    this.scrubberPaintColor = Colors.blue,
     this.thumbnailQuality = 75,
     this.showDuration = true,
     this.durationTextStyle = const TextStyle(
@@ -225,6 +225,10 @@ class _TrimEditorState extends State<TrimEditor> with TickerProviderStateMixin {
   Animation<double> _scrubberAnimation;
   AnimationController _animationController;
   Tween<double> _linearTween;
+
+  double _scrollWidth = 100;
+  double _scrollStar = 15;
+  double _scrollEnd = 100;
 
   Future<void> _initializeVideoController() async {
     if (_videoFile != null) {
@@ -290,9 +294,9 @@ class _TrimEditorState extends State<TrimEditor> with TickerProviderStateMixin {
       if (maxLengthPixels != null) {
         if (!(_endPos.dx - _startPos.dx - details.delta.dx > maxLengthPixels)) {
           setState(() {
-            if (!(_startPos.dx + details.delta.dx < 0))
-              _startPos += details.delta;
-
+            _startPos.dx + details.delta.dx < 0
+                ? null
+                : _startPos += details.delta;
             _startFraction = (_startPos.dx / _thumbnailViewerW);
 
             _videoStartPos = _videoDuration * _startFraction;
@@ -308,9 +312,9 @@ class _TrimEditorState extends State<TrimEditor> with TickerProviderStateMixin {
         }
       } else {
         setState(() {
-          if (!(_startPos.dx + details.delta.dx < 0))
-            _startPos += details.delta;
-
+          _startPos.dx + details.delta.dx < 0
+              ? null
+              : _startPos += details.delta;
           _startFraction = (_startPos.dx / _thumbnailViewerW);
 
           _videoStartPos = _videoDuration * _startFraction;
@@ -414,62 +418,6 @@ class _TrimEditorState extends State<TrimEditor> with TickerProviderStateMixin {
           _animationController.stop();
         }
       });
-
-    if (thumbnailWidget.scrollController != null)
-      thumbnailWidget.scrollController.addListener(() {
-        print(
-            "===================addListener offset:" +
-                thumbnailWidget.scrollController.offset.toString());
-        print(
-            "===================addListener _endPos.dx:" +
-                _endPos.dx.toString() + "  _startPos.dx:" +
-            _startPos.dx.toString());
-
-        _circleSize = widget.circleSizeOnDrag;
-
-        if (_endPos.dx >= _startPos.dx) {
-          _isLeftDrag = false;
-          if (_canUpdateStart && _startPos.dx + thumbnailWidget.scrollController.offset.dx > 0) {
-            _isLeftDrag = false; // To prevent from scrolling over
-            _setVideoStartPosition(details);
-          } else if (!_canUpdateStart &&
-              _endPos.dx + details.delta.dx < _thumbnailViewerW) {
-            _isLeftDrag = true; // To prevent from scrolling over
-            _setVideoEndPosition(details);
-          }
-        } else {
-          if (_isLeftDrag && _startPos.dx + details.delta.dx > 0) {
-            _setVideoStartPosition(details);
-          } else if (!_isLeftDrag &&
-              _endPos.dx + details.delta.dx < _thumbnailViewerW) {
-            _setVideoEndPosition(details);
-          }
-        }
-
-
-//        if (_endPos.dx >= _startPos.dx) {
-////          print(
-////              "===================addListener offset.abs:" +
-////                  (_startPos.dx - thumbnailWidget.scrollController.offset).abs().toString() + "      ，after : " + (_endPos.dx - thumbnailWidget.scrollController.offset).abs().toString());
-////
-////          if ((_startPos.dx - thumbnailWidget.scrollController.offset).abs() >
-////              (_endPos.dx - thumbnailWidget.scrollController.offset).abs()) {
-////            setState(() {
-////              _canUpdateStart = false;
-////            });
-////          } else {
-////            setState(() {
-////              _canUpdateStart = true;
-////            });
-////          }
-////        } else {
-////          if (_startPos.dx > thumbnailWidget.scrollController.offset) {
-////            _isLeftDrag = true;
-////          } else {
-////            _isLeftDrag = false;
-////          }
-////        }
-      });
   }
 
   @override
@@ -490,146 +438,218 @@ class _TrimEditorState extends State<TrimEditor> with TickerProviderStateMixin {
     return Stack(
       children: <Widget>[
         Container(
-          color: Colors.grey[900],
+          margin: EdgeInsets.only(left: 15, top: 15),
           height: _thumbnailViewerH,
-          width: _thumbnailViewerW,
           child: thumbnailWidget,
         ),
-        GestureDetector(
-          onHorizontalDragStart: (DragStartDetails details) {
-            print(
-                "===========================================onHorizontalDragStart");
-            print("START");
-            print(details.localPosition);
-            print((_startPos.dx - details.localPosition.dx).abs());
-            print((_endPos.dx - details.localPosition.dx).abs());
-
-            if (_endPos.dx >= _startPos.dx) {
-              if ((_startPos.dx - details.localPosition.dx).abs() >
-                  (_endPos.dx - details.localPosition.dx).abs()) {
+//        Container(
+//          margin: EdgeInsets.only(top: 15),
+        Row(
+          children: <Widget>[
+            GestureDetector(
+              onTapDown: (details) {
+                print("============ onTapDown");
+              },
+              onHorizontalDragStart: (DragStartDetails details) {
+                print("============ onHorizontalDragStart");
+              },
+              onHorizontalDragEnd: (DragEndDetails details) {
+                print("============ onHorizontalDragEnd");
+              },
+              onHorizontalDragUpdate: (DragUpdateDetails details) {
+                print("============ onHorizontalDragUpdate" +
+                    details.localPosition.dx.toString());
+                _scrollStar = details.localPosition.dx;
                 setState(() {
-                  _canUpdateStart = false;
-                });
-              } else {
-                setState(() {
-                  _canUpdateStart = true;
-                });
-              }
-            } else {
-              if (_startPos.dx > details.localPosition.dx) {
-                _isLeftDrag = true;
-              } else {
-                _isLeftDrag = false;
-              }
-            }
-          },
-          onHorizontalDragEnd: (DragEndDetails details) {
-            print(
-                "===========================================onHorizontalDragEnd");
-            setState(() {
-              _circleSize = widget.circleSize;
-            });
-          },
-          onHorizontalDragUpdate: (DragUpdateDetails details) {
-            print(
-                "===========================================onHorizontalDragUpdate");
-            _circleSize = widget.circleSizeOnDrag;
 
-            if (_endPos.dx >= _startPos.dx) {
-              _isLeftDrag = false;
-              if (_canUpdateStart && _startPos.dx + details.delta.dx > 0) {
-                _isLeftDrag = false; // To prevent from scrolling over
-                _setVideoStartPosition(details);
-              } else if (!_canUpdateStart &&
-                  _endPos.dx + details.delta.dx < _thumbnailViewerW) {
-                _isLeftDrag = true; // To prevent from scrolling over
-                _setVideoEndPosition(details);
-              }
-            } else {
-              if (_isLeftDrag && _startPos.dx + details.delta.dx > 0) {
-                _setVideoStartPosition(details);
-              } else if (!_isLeftDrag &&
-                  _endPos.dx + details.delta.dx < _thumbnailViewerW) {
-                _setVideoEndPosition(details);
-              }
-            }
-          },
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              widget.showDuration
-                  ? Container(
-                      width: _thumbnailViewerW,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          mainAxisSize: MainAxisSize.max,
-                          children: <Widget>[
-                            Text(
-                              Duration(milliseconds: _videoStartPos.toInt())
-                                  .toString()
-                                  .split('.')[0],
-                              style: widget.durationTextStyle,
-                            ),
-                            Text(
-                              Duration(milliseconds: _videoEndPos.toInt())
-                                  .toString()
-                                  .split('.')[0],
-                              style: widget.durationTextStyle,
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  : Container(),
-              CustomPaint(
-                foregroundPainter: TrimEditorPainter(
-                  startPos: _startPos,
-                  endPos: _endPos,
-                  scrubberAnimationDx: _scrubberAnimation.value,
-                  circleSize: _circleSize,
-                  circlePaintColor: widget.circlePaintColor,
-                  borderPaintColor: widget.borderPaintColor,
-//              scrubberPaintColor: widget.scrubberPaintColor,
-                  scrubberPaintColor: Colors.yellow,
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    print(
-                        "===========================================GestureDetector    onTap");
-                  },
-                  onPanDown: (_) {
-//                    thumbnailWidget.scrollPhysics =
-//                        NeverScrollableScrollPhysics();
-                    print(
-                        "=========================================== GestureDetector    onPanDown");
-                  },
-                  onPanCancel: () {
-                    print(
-                        "=========================================== GestureDetector    onPanCancel");
-                  },
-                  onTapUp: (_) {
-                    print(
-                        "=========================================== GestureDetector    onTapUp");
-                  },
-                  onLongPressMoveUpdate: (_) {
-                    print(
-                        "=========================================== GestureDetector    onLongPressMoveUpdate");
-                  },
-                  child: Container(
-//                    color: Colors.grey[900],
-                    color: Colors.grey[900],
-                    height: _thumbnailViewerH,
-                    width: _thumbnailViewerW,
-                    child: thumbnailWidget != null ? Column() : thumbnailWidget,
-                  ),
-                ),
+                });
+              },
+              child: Container(
+                margin: EdgeInsets.only(top: 15, left: _scrollStar),
+                width: 10,
+                height: _thumbnailViewerH,
+                color: Colors.red,
               ),
-            ],
-          ),
+            ),
+//            SizedBox(width: 100,),
+            GestureDetector(
+              onTapDown: (details) {
+                print("============ onTapDown");
+              },
+              onHorizontalDragStart: (DragStartDetails details) {
+                print("============ onHorizontalDragStart");
+              },
+              onHorizontalDragEnd: (DragEndDetails details) {
+                print("============ onHorizontalDragEnd");
+              },
+              onHorizontalDragUpdate: (DragUpdateDetails details) {
+                print("============ onHorizontalDragUpdate" +
+                    details.localPosition.dx.toString());
+                _scrollEnd = details.localPosition.dx;
+                setState(() {
+
+                });
+              },
+              child: Container(
+                margin: EdgeInsets.only(top: 15, left: _scrollEnd),
+                width: 10,
+                height: _thumbnailViewerH,
+                color: Colors.red,
+              ),
+            ),
+          ],
+//          ),
         ),
+//        GestureDetector(
+//          onTapDown: (details) {
+//            print("============ onTapDown");
+//          },
+//          onHorizontalDragStart: (DragStartDetails details) {
+//            print("============ onHorizontalDragStart");
+//          },
+//          onHorizontalDragEnd: (DragEndDetails details) {
+//            print("============ onHorizontalDragEnd");
+//          },
+//          onHorizontalDragUpdate: (DragUpdateDetails details) {
+//            print("============ onHorizontalDragUpdate" +
+//                details.localPosition.dx.toString());
+//
+//            if (details.localPosition.dx / 2 > (_scrollWidth / 2)) {
+//              _scrollWidth = details.localPosition.dx;
+//            } else {
+//              _scrollWidth = _scrollWidth - details.localPosition.dx;
+//              _scrollStar = _scrollStar + details.localPosition.dx;
+//            }
+//
+//            setState(() {});
+//          },
+//          child: Container(
+//            width: _scrollWidth,
+//            height: _thumbnailViewerH,
+//            margin: EdgeInsets.only(left: _scrollStar, top: 15),
+////            padding: EdgeInsets.only(left: 12, right: 12, top: 5, bottom: 5),
+//            decoration: BoxDecoration(
+//              border: Border(
+//                  left: BorderSide(color: Colors.white, width: 15),
+//                  right: BorderSide(color: Colors.white, width: 15),
+//                  top: BorderSide(color: Colors.red, width: 1),
+//                  bottom: BorderSide(color: Colors.red, width: 1)),
+//            ),
+//          ),
+//        ),
       ],
     );
+//    return GestureDetector(
+//      onTapDown: (details) {
+//        print("onTapDown...." + details.localPosition.dx.toString());
+//
+////        if(_endPos.dx == details.localPosition.dx)
+//      },
+//
+//      onHorizontalDragStart: (DragStartDetails details) {
+//        print("START");
+//        print(details.localPosition);
+//        print((_startPos.dx - details.localPosition.dx).abs());
+//        print((_endPos.dx - details.localPosition.dx).abs());
+//
+//        if (_endPos.dx >= _startPos.dx) {
+//          if ((_startPos.dx - details.localPosition.dx).abs() >
+//              (_endPos.dx - details.localPosition.dx).abs()) {
+//            setState(() {
+//              _canUpdateStart = false;
+//            });
+//          } else {
+//            setState(() {
+//              _canUpdateStart = true;
+//            });
+//          }
+//        } else {
+//          if (_startPos.dx > details.localPosition.dx) {
+//            _isLeftDrag = true;
+//          } else {
+//            _isLeftDrag = false;
+//          }
+//        }
+//      },
+//      onHorizontalDragEnd: (DragEndDetails details) {
+//        setState(() {
+//          _circleSize = widget.circleSize;
+//        });
+//      },
+//      onHorizontalDragUpdate: (DragUpdateDetails details) {
+//        _circleSize = widget.circleSizeOnDrag;
+//
+//        if (_endPos.dx >= _startPos.dx) {
+//          _isLeftDrag = false;
+//          if (_canUpdateStart && _startPos.dx + details.delta.dx > 0) {
+//            _isLeftDrag = false; // To prevent from scrolling over
+//            _setVideoStartPosition(details);
+//          } else if (!_canUpdateStart &&
+//              _endPos.dx + details.delta.dx < _thumbnailViewerW) {
+//            _isLeftDrag = true; // To prevent from scrolling over
+//            _setVideoEndPosition(details);
+//          }
+//        } else {
+//          if (_isLeftDrag && _startPos.dx + details.delta.dx > 0) {
+//            _setVideoStartPosition(details);
+//          } else if (!_isLeftDrag &&
+//              _endPos.dx + details.delta.dx < _thumbnailViewerW) {
+//            _setVideoEndPosition(details);
+//          }
+//        }
+//      },
+
+//      child: Column(
+//        mainAxisSize: MainAxisSize.min,
+//        children: <Widget>[
+//          widget.showDuration
+//              ? Container(
+//
+//            ///选择时间的范围
+//            width: _thumbnailViewerW,
+//            child: Padding(
+//              padding: const EdgeInsets.only(bottom: 8.0),
+//              child: Row(
+//                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                mainAxisSize: MainAxisSize.max,
+//                children: <Widget>[
+//                  Text(
+//                    Duration(milliseconds: _videoStartPos.toInt())
+//                        .toString()
+//                        .split('.')[0],
+//                    style: widget.durationTextStyle,
+//                  ),
+//                  Text(
+//                    Duration(milliseconds: _videoEndPos.toInt())
+//                        .toString()
+//                        .split('.')[0],
+//                    style: widget.durationTextStyle,
+//                  ),
+//                ],
+//              ),
+//            ),
+//          )
+//              : Container(),
+//          CustomPaint(
+//            foregroundPainter: TrimEditorPainter(
+//              startPos: _startPos,
+//              endPos: _endPos,
+//              scrubberAnimationDx: _scrubberAnimation.value,
+//              circleSize: _circleSize,
+//              circlePaintColor: widget.circlePaintColor,
+//              borderPaintColor: widget.borderPaintColor,
+//              scrubberPaintColor: widget.scrubberPaintColor,
+//            ),
+//            child: Container(
+//              color: Colors.grey[900],
+//              height: _thumbnailViewerH,
+//              width: _thumbnailViewerW,
+////              width: 1000,
+//              child: thumbnailWidget == null ? Column() : thumbnailWidget,
+//            ),
+//          ),
+//        ],
+//      ),
+//    );
   }
 }

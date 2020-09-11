@@ -40,7 +40,7 @@ class _ThumbnailViewerState extends State<ThumbnailViewer> {
     // TODO: implement initState
     super.initState();
     widget.scrollController.addListener(() {
-      print("=========================" + widget.scrollController.offset.toString());
+//      print("=========================" + widget.scrollController.offset.toString());
 //      setState(() {
 //
 //      });
