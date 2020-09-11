@@ -11,6 +11,9 @@ class ThumbnailViewer extends StatefulWidget {
   final int numberOfThumbnails;
   final int quality;
 
+  ScrollPhysics scrollPhysics = AlwaysScrollableScrollPhysics();
+  ScrollController scrollController = new ScrollController();
+
   @override
   _ThumbnailViewerState createState() => _ThumbnailViewerState();
 
@@ -31,14 +34,13 @@ class ThumbnailViewer extends StatefulWidget {
 }
 
 class _ThumbnailViewerState extends State<ThumbnailViewer> {
-  ScrollController scrollController = new ScrollController();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    scrollController.addListener(() {
-      print("=========================" + scrollController.offset.toString());
+    widget.scrollController.addListener(() {
+      print("=========================" + widget.scrollController.offset.toString());
 //      setState(() {
 //
 //      });
@@ -54,8 +56,8 @@ class _ThumbnailViewerState extends State<ThumbnailViewer> {
         if (snapshot.hasData) {
           List<Uint8List> _imageBytes = snapshot.data;
           return ListView.builder(
-              controller: scrollController,
-//              physics: NeverScrollableScrollPhysics(),
+              controller: widget.scrollController,
+              physics: widget.scrollPhysics,
               scrollDirection: Axis.horizontal,
               itemCount: snapshot.data.length,
               itemBuilder: (context, index) {

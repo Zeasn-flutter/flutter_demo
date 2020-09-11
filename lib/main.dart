@@ -37,14 +37,16 @@ class HomeTrimmerPage extends StatelessWidget {
         child: RaisedButton(
           child: Text("LOAD VIDEO"),
           onPressed: () async {
-            File file = await ImagePicker.pickVideo(
-              source: ImageSource.gallery,
-            );
-            print("file.path ===" + file.path);
+//            File file = await ImagePicker.pickVideo(
+//              source: ImageSource.gallery,
+//            );
+//            print("file.path ===" + file.path);
 //            File file = new File(
 //                "/data/user/0/com.example.flutter_ap/cache/image_picker3631397302260407409.jpg");
 //            File file = new File(
 //                "/data/user/0/com.example.flutter_ap/cache/image_picker2546732214910810454.jpg");
+            File file = new File(
+                "/storage/emulated/0/DCIM/Camera/VID_20200908_190316.mp4");
             if (file != null) {
               await _trimmer.loadVideo(videoFile: file);
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {

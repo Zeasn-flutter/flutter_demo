@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_ap/BottomSheetWidget.dart';
 
 class TrimEditorPainter extends CustomPainter {
   /// To define the start offset
@@ -87,7 +88,7 @@ class TrimEditorPainter extends CustomPainter {
     @required this.endPos,
     @required this.scrubberAnimationDx,
     this.circleSize = 0.5,
-    this.borderWidth = 3,
+    this.borderWidth = 5,
     this.scrubberWidth = 1,
     this.showScrubber = true,
     this.borderPaintColor = Colors.white,

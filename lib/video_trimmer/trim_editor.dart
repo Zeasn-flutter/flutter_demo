@@ -414,6 +414,62 @@ class _TrimEditorState extends State<TrimEditor> with TickerProviderStateMixin {
           _animationController.stop();
         }
       });
+
+    if (thumbnailWidget.scrollController != null)
+      thumbnailWidget.scrollController.addListener(() {
+        print(
+            "===================addListener offset:" +
+                thumbnailWidget.scrollController.offset.toString());
+        print(
+            "===================addListener _endPos.dx:" +
+                _endPos.dx.toString() + "  _startPos.dx:" +
+            _startPos.dx.toString());
+
+        _circleSize = widget.circleSizeOnDrag;
+
+        if (_endPos.dx >= _startPos.dx) {
+          _isLeftDrag = false;
+          if (_canUpdateStart && _startPos.dx + thumbnailWidget.scrollController.offset.dx > 0) {
+            _isLeftDrag = false; // To prevent from scrolling over
+            _setVideoStartPosition(details);
+          } else if (!_canUpdateStart &&
+              _endPos.dx + details.delta.dx < _thumbnailViewerW) {
+            _isLeftDrag = true; // To prevent from scrolling over
+            _setVideoEndPosition(details);
+          }
+        } else {
+          if (_isLeftDrag && _startPos.dx + details.delta.dx > 0) {
+            _setVideoStartPosition(details);
+          } else if (!_isLeftDrag &&
+              _endPos.dx + details.delta.dx < _thumbnailViewerW) {
+            _setVideoEndPosition(details);
+          }
+        }
+
+
+//        if (_endPos.dx >= _startPos.dx) {
+////          print(
+////              "===================addListener offset.abs:" +
+////                  (_startPos.dx - thumbnailWidget.scrollController.offset).abs().toString() + "      ，after : " + (_endPos.dx - thumbnailWidget.scrollController.offset).abs().toString());
+////
+////          if ((_startPos.dx - thumbnailWidget.scrollController.offset).abs() >
+////              (_endPos.dx - thumbnailWidget.scrollController.offset).abs()) {
+////            setState(() {
+////              _canUpdateStart = false;
+////            });
+////          } else {
+////            setState(() {
+////              _canUpdateStart = true;
+////            });
+////          }
+////        } else {
+////          if (_startPos.dx > thumbnailWidget.scrollController.offset) {
+////            _isLeftDrag = true;
+////          } else {
+////            _isLeftDrag = false;
+////          }
+////        }
+      });
   }
 
   @override
@@ -431,114 +487,149 @@ class _TrimEditorState extends State<TrimEditor> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Stack(
+      children: <Widget>[
+        Container(
+          color: Colors.grey[900],
+          height: _thumbnailViewerH,
+          width: _thumbnailViewerW,
+          child: thumbnailWidget,
+        ),
+        GestureDetector(
+          onHorizontalDragStart: (DragStartDetails details) {
+            print(
+                "===========================================onHorizontalDragStart");
+            print("START");
+            print(details.localPosition);
+            print((_startPos.dx - details.localPosition.dx).abs());
+            print((_endPos.dx - details.localPosition.dx).abs());
 
+            if (_endPos.dx >= _startPos.dx) {
+              if ((_startPos.dx - details.localPosition.dx).abs() >
+                  (_endPos.dx - details.localPosition.dx).abs()) {
+                setState(() {
+                  _canUpdateStart = false;
+                });
+              } else {
+                setState(() {
+                  _canUpdateStart = true;
+                });
+              }
+            } else {
+              if (_startPos.dx > details.localPosition.dx) {
+                _isLeftDrag = true;
+              } else {
+                _isLeftDrag = false;
+              }
+            }
+          },
+          onHorizontalDragEnd: (DragEndDetails details) {
+            print(
+                "===========================================onHorizontalDragEnd");
+            setState(() {
+              _circleSize = widget.circleSize;
+            });
+          },
+          onHorizontalDragUpdate: (DragUpdateDetails details) {
+            print(
+                "===========================================onHorizontalDragUpdate");
+            _circleSize = widget.circleSizeOnDrag;
 
-
-      onHorizontalDragStart: (DragStartDetails details) {
-        print("START");
-        print(details.localPosition);
-        print((_startPos.dx - details.localPosition.dx).abs());
-        print((_endPos.dx - details.localPosition.dx).abs());
-
-//        if (_endPos.dx >= _startPos.dx) {
-//          if ((_startPos.dx - details.localPosition.dx).abs() >
-//              (_endPos.dx - details.localPosition.dx).abs()) {
-//            setState(() {
-//              _canUpdateStart = false;
-//            });
-//          } else {
-//            setState(() {
-//              _canUpdateStart = true;
-//            });
-//          }
-//        } else {
-//          if (_startPos.dx > details.localPosition.dx) {
-//            _isLeftDrag = true;
-//          } else {
-//            _isLeftDrag = false;
-//          }
-//        }
-      },
-      onHorizontalDragEnd: (DragEndDetails details) {
-        setState(() {
-          _circleSize = widget.circleSize;
-        });
-      },
-      onHorizontalDragUpdate: (DragUpdateDetails details) {
-        _circleSize = widget.circleSizeOnDrag;
-
-        if (_endPos.dx >= _startPos.dx) {
-          _isLeftDrag = false;
-          if (_canUpdateStart && _startPos.dx + details.delta.dx > 0) {
-            _isLeftDrag = false; // To prevent from scrolling over
-            _setVideoStartPosition(details);
-          } else if (!_canUpdateStart &&
-              _endPos.dx + details.delta.dx < _thumbnailViewerW) {
-            _isLeftDrag = true; // To prevent from scrolling over
-            _setVideoEndPosition(details);
-          }
-        } else {
-          if (_isLeftDrag && _startPos.dx + details.delta.dx > 0) {
-            _setVideoStartPosition(details);
-          } else if (!_isLeftDrag &&
-              _endPos.dx + details.delta.dx < _thumbnailViewerW) {
-            _setVideoEndPosition(details);
-          }
-        }
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          widget.showDuration
-              ? Container(
-                  width: _thumbnailViewerW,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        Text(
-                          Duration(milliseconds: _videoStartPos.toInt())
-                              .toString()
-                              .split('.')[0],
-                          style: widget.durationTextStyle,
+            if (_endPos.dx >= _startPos.dx) {
+              _isLeftDrag = false;
+              if (_canUpdateStart && _startPos.dx + details.delta.dx > 0) {
+                _isLeftDrag = false; // To prevent from scrolling over
+                _setVideoStartPosition(details);
+              } else if (!_canUpdateStart &&
+                  _endPos.dx + details.delta.dx < _thumbnailViewerW) {
+                _isLeftDrag = true; // To prevent from scrolling over
+                _setVideoEndPosition(details);
+              }
+            } else {
+              if (_isLeftDrag && _startPos.dx + details.delta.dx > 0) {
+                _setVideoStartPosition(details);
+              } else if (!_isLeftDrag &&
+                  _endPos.dx + details.delta.dx < _thumbnailViewerW) {
+                _setVideoEndPosition(details);
+              }
+            }
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              widget.showDuration
+                  ? Container(
+                      width: _thumbnailViewerW,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisSize: MainAxisSize.max,
+                          children: <Widget>[
+                            Text(
+                              Duration(milliseconds: _videoStartPos.toInt())
+                                  .toString()
+                                  .split('.')[0],
+                              style: widget.durationTextStyle,
+                            ),
+                            Text(
+                              Duration(milliseconds: _videoEndPos.toInt())
+                                  .toString()
+                                  .split('.')[0],
+                              style: widget.durationTextStyle,
+                            ),
+                          ],
                         ),
-                        Text(
-                          Duration(milliseconds: _videoEndPos.toInt())
-                              .toString()
-                              .split('.')[0],
-                          style: widget.durationTextStyle,
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : Container(),
-          CustomPaint(
-            foregroundPainter: TrimEditorPainter(
-              startPos: _startPos,
-              endPos: _endPos,
-              scrubberAnimationDx: _scrubberAnimation.value,
-              circleSize: _circleSize,
-              circlePaintColor: widget.circlePaintColor,
-              borderPaintColor: widget.borderPaintColor,
+                      ),
+                    )
+                  : Container(),
+              CustomPaint(
+                foregroundPainter: TrimEditorPainter(
+                  startPos: _startPos,
+                  endPos: _endPos,
+                  scrubberAnimationDx: _scrubberAnimation.value,
+                  circleSize: _circleSize,
+                  circlePaintColor: widget.circlePaintColor,
+                  borderPaintColor: widget.borderPaintColor,
 //              scrubberPaintColor: widget.scrubberPaintColor,
-              scrubberPaintColor: Colors.yellow,
-            ),
-            child: Container(
-              color: Colors.grey[900],
-              height: _thumbnailViewerH,
-//              width: _thumbnailViewerW,
-              width: _thumbnailViewerW,
-              child: thumbnailWidget == null
-                  ? Column()
-                  : thumbnailWidget,
-            ),
+                  scrubberPaintColor: Colors.yellow,
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    print(
+                        "===========================================GestureDetector    onTap");
+                  },
+                  onPanDown: (_) {
+//                    thumbnailWidget.scrollPhysics =
+//                        NeverScrollableScrollPhysics();
+                    print(
+                        "=========================================== GestureDetector    onPanDown");
+                  },
+                  onPanCancel: () {
+                    print(
+                        "=========================================== GestureDetector    onPanCancel");
+                  },
+                  onTapUp: (_) {
+                    print(
+                        "=========================================== GestureDetector    onTapUp");
+                  },
+                  onLongPressMoveUpdate: (_) {
+                    print(
+                        "=========================================== GestureDetector    onLongPressMoveUpdate");
+                  },
+                  child: Container(
+//                    color: Colors.grey[900],
+                    color: Colors.grey[900],
+                    height: _thumbnailViewerH,
+                    width: _thumbnailViewerW,
+                    child: thumbnailWidget != null ? Column() : thumbnailWidget,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
