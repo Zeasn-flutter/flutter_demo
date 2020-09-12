@@ -122,6 +122,7 @@ class _TrimmerViewState extends State<TrimmerView> {
                   child: VideoEditorWidget(
                     ScreenUtil.screenWidth - (Dimen.w_30 * 2),
                     Dimen.h_158,
+                    dragWidth: Dimen.w_35,
                     maxEditorMilliSeconds: 15000,
                     onEditorIndexChanged: (start, end) {
                       _videoStartPos = start;

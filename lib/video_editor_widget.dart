@@ -17,6 +17,9 @@ class VideoEditorWidget extends StatefulWidget {
   ///整个控件高度
   double height;
 
+  ///拖动的宽度
+  double dragWidth;
+
   ///视频最大的剪辑长度
   int maxEditorMilliSeconds;
 
@@ -27,8 +30,9 @@ class VideoEditorWidget extends StatefulWidget {
 
   VideoEditorWidget(this.width, this.height,
       {@required this.maxEditorMilliSeconds: 15000,
-        this.onEditorIndexChanged,
-        this.onChangePlaybackState});
+      this.dragWidth: 17,
+      this.onEditorIndexChanged,
+      this.onChangePlaybackState});
 
   @override
   State createState() => _VideoEditorState();
@@ -252,8 +256,7 @@ class _VideoEditorState extends State<VideoEditorWidget> {
         if (!(_endIndeOffset.dx - _startIndexOffset.dx + details.delta.dx >
             maxEditLengthPixels)) {
           _endIndeOffset += details.delta;
-          _videoEndIndex =
-              (scrollOffset + _endIndeOffset.dx) / _offsetSeconds;
+          _videoEndIndex = (scrollOffset + _endIndeOffset.dx) / _offsetSeconds;
           _onChangeEditorIndex(_videoStartIndex, _videoEndIndex);
           editorViewModel.notifyListeners();
           await videoPlayerController.pause();
@@ -306,8 +309,8 @@ class _VideoEditorState extends State<VideoEditorWidget> {
                 }
               },
             )),
-        ViewModelBuilder.reactive(builder: (_, __,___) =>
-            GestureDetector(
+        ViewModelBuilder.reactive(
+            builder: (_, __, ___) => GestureDetector(
                 onHorizontalDragStart: (DragStartDetails details) {
                   print("START");
                   print(details.localPosition);
@@ -317,7 +320,7 @@ class _VideoEditorState extends State<VideoEditorWidget> {
 
                   if (_endIndeOffset.dx >= _startIndexOffset.dx) {
                     if ((_startIndexOffset.dx - details.localPosition.dx)
-                        .abs() >
+                            .abs() >
                         (_endIndeOffset.dx - details.localPosition.dx).abs()) {
                       _canUpdateStart = false;
                       editorViewModel.notifyListeners();
@@ -366,10 +369,10 @@ class _VideoEditorState extends State<VideoEditorWidget> {
                     child: Stack(
                       children: [
                         Container(
-                          margin:
-                          EdgeInsets.fromLTRB(_startIndexOffset.dx, 0, 0, 0),
+                          margin: EdgeInsets.fromLTRB(
+                              _startIndexOffset.dx, 0, 0, 0),
                           color: Colors.greenAccent,
-                          width: Dimen.w_35,
+                          width: widget.dragWidth,
                           height: _thumbHeight,
                           alignment: Alignment(0, 0),
                           child: Container(
@@ -379,9 +382,14 @@ class _VideoEditorState extends State<VideoEditorWidget> {
                         ),
                         Container(
                           margin: EdgeInsets.fromLTRB(
-                              _endIndeOffset.dx, 0, 0, 0),
+                              _endIndeOffset.dx - widget.dragWidth < 0
+                                  ? 0
+                                  : _endIndeOffset.dx - widget.dragWidth,
+                              0,
+                              0,
+                              0),
                           color: Colors.greenAccent,
-                          width: Dimen.w_35,
+                          width: widget.dragWidth,
                           height: _thumbHeight,
                           alignment: Alignment(0, 0),
                           child: Container(
@@ -390,8 +398,8 @@ class _VideoEditorState extends State<VideoEditorWidget> {
                               color: Colors.white),
                         ),
                         Container(
-                            margin:
-                            EdgeInsets.fromLTRB(_startIndexOffset.dx, 0, 0, 0),
+                            margin: EdgeInsets.fromLTRB(
+                                _startIndexOffset.dx, 0, 0, 0),
                             color: Colors.greenAccent,
                             width: (_endIndeOffset.dx - _startIndexOffset.dx),
                             height: Dimen.h_6),
@@ -402,8 +410,8 @@ class _VideoEditorState extends State<VideoEditorWidget> {
                             width: (_endIndeOffset.dx - _startIndexOffset.dx),
                             height: Dimen.h_6),
                       ],
-                    ))), viewModelBuilder: () => editorViewModel)
-
+                    ))),
+            viewModelBuilder: () => editorViewModel)
       ],
     );
   }
