@@ -23,6 +23,12 @@ class VideoEditorWidget extends StatefulWidget {
   ///视频最大的剪辑长度
   int maxEditorMilliSeconds;
 
+  ///内层颜色
+  Color dragInnerColor;
+
+  ///外层颜色
+  Color dragOutterColor;
+
   ///剪辑区域变化回调
   Function(double videoStartIndex, double videoEndIndex) onEditorIndexChanged;
 
@@ -31,6 +37,8 @@ class VideoEditorWidget extends StatefulWidget {
   VideoEditorWidget(this.width, this.height,
       {@required this.maxEditorMilliSeconds: 15000,
       this.dragWidth: 17,
+      this.dragInnerColor: Colors.white,
+      this.dragOutterColor: Colors.greenAccent,
       this.onEditorIndexChanged,
       this.onChangePlaybackState});
 
@@ -371,14 +379,14 @@ class _VideoEditorState extends State<VideoEditorWidget> {
                         Container(
                           margin: EdgeInsets.fromLTRB(
                               _startIndexOffset.dx, 0, 0, 0),
-                          color: Colors.greenAccent,
+                          color: widget.dragOutterColor,
                           width: widget.dragWidth,
                           height: _thumbHeight,
                           alignment: Alignment(0, 0),
                           child: Container(
                               width: Dimen.w_4,
                               height: Dimen.w_64,
-                              color: Colors.white),
+                              color: widget.dragInnerColor),
                         ),
                         Container(
                           margin: EdgeInsets.fromLTRB(
@@ -388,25 +396,25 @@ class _VideoEditorState extends State<VideoEditorWidget> {
                               0,
                               0,
                               0),
-                          color: Colors.greenAccent,
+                          color: widget.dragOutterColor,
                           width: widget.dragWidth,
                           height: _thumbHeight,
                           alignment: Alignment(0, 0),
                           child: Container(
                               width: Dimen.w_4,
                               height: Dimen.w_64,
-                              color: Colors.white),
+                              color: widget.dragInnerColor),
                         ),
                         Container(
                             margin: EdgeInsets.fromLTRB(
                                 _startIndexOffset.dx, 0, 0, 0),
-                            color: Colors.greenAccent,
+                            color: widget.dragOutterColor,
                             width: (_endIndeOffset.dx - _startIndexOffset.dx),
                             height: Dimen.h_6),
                         Container(
                             margin: EdgeInsets.fromLTRB(_startIndexOffset.dx,
                                 _thumbHeight - Dimen.h_6, 0, 0),
-                            color: Colors.greenAccent,
+                            color: widget.dragOutterColor,
                             width: (_endIndeOffset.dx - _startIndexOffset.dx),
                             height: Dimen.h_6),
                       ],

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_ap/color.dart';
 import 'package:flutter_ap/dimen.dart';
 import 'package:flutter_ap/video_editor_widget.dart';
 import 'package:flutter_ap/video_trimmer/trim_editor.dart';
@@ -95,7 +96,8 @@ class _TrimmerViewState extends State<TrimmerView> {
 
                 ViewModelBuilder.reactive(
                     builder: (_, __, ___) => Container(
-                      padding: EdgeInsets.fromLTRB(Dimen.w_30, 0, Dimen.w_30, 0),
+                          padding:
+                              EdgeInsets.fromLTRB(Dimen.w_30, 0, Dimen.w_30, 0),
                           alignment: Alignment(1, 0),
                           height: Dimen.h_60,
                           color: Colors.deepPurple,
@@ -123,6 +125,8 @@ class _TrimmerViewState extends State<TrimmerView> {
                     ScreenUtil.screenWidth - (Dimen.w_30 * 2),
                     Dimen.h_158,
                     dragWidth: Dimen.w_35,
+                    dragInnerColor: Colors.white,
+                    dragOutterColor: MyColors.colorIndicatorS,
                     maxEditorMilliSeconds: 15000,
                     onEditorIndexChanged: (start, end) {
                       _videoStartPos = start;
