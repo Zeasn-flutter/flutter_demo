@@ -6,8 +6,6 @@ import 'package:flutter_ap/video_trimmer/video_trimmer.dart';
 import 'package:stacked/stacked.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
-import 'dimen.dart';
-
 //VideoPlayerController videoPlayerController;
 
 class VideoEditorWidget extends StatefulWidget {
@@ -18,7 +16,10 @@ class VideoEditorWidget extends StatefulWidget {
   double height;
 
   ///拖动的宽度
-  double dragWidth;
+  double dragStrokeWidth;
+
+  ///上下边框宽度
+  double littleStrokeWidth;
 
   ///视频最大的剪辑长度
   int maxEditorMilliSeconds;
@@ -36,7 +37,8 @@ class VideoEditorWidget extends StatefulWidget {
 
   VideoEditorWidget(this.width, this.height,
       {@required this.maxEditorMilliSeconds: 15000,
-      this.dragWidth: 17,
+      this.dragStrokeWidth: 18,
+      this.littleStrokeWidth: 3,
       this.dragInnerColor: Colors.white,
       this.dragOutterColor: Colors.greenAccent,
       this.onEditorIndexChanged,
@@ -257,7 +259,7 @@ class _VideoEditorState extends State<VideoEditorWidget> {
   }
 
   void _setVideoEndPosition(DragUpdateDetails details) async {
-    if (!(_endIndeOffset.dx + details.delta.dx > _thumbGalleryScrolloffset) &&
+    if (!(_endIndeOffset.dx + details.delta.dx > widget.width) &&
         !(_endIndeOffset.dx + details.delta.dx < 0) &&
         !(_endIndeOffset.dx + details.delta.dx < _startIndexOffset.dx)) {
       if (maxEditLengthPixels != null) {
@@ -346,22 +348,18 @@ class _VideoEditorState extends State<VideoEditorWidget> {
                 },
                 onHorizontalDragUpdate: (DragUpdateDetails details) {
                   if (_endIndeOffset.dx >= _startIndexOffset.dx) {
-                    print('left a');
                     _isLeftDrag = false;
                     if (_canUpdateStart &&
                         _startIndexOffset.dx + details.delta.dx > 0) {
-                      print('left c');
                       _isLeftDrag = false; // To prevent from scrolling over
                       _setVideoStartPosition(details);
                     } else if (!_canUpdateStart &&
                         _endIndeOffset.dx + details.delta.dx <
                             _thumbGalleryScrolloffset) {
-                      print('left d');
                       _isLeftDrag = true; // To prevent from scrolling over
                       _setVideoEndPosition(details);
                     }
                   } else {
-                    print('left b');
                     if (_isLeftDrag &&
                         _startIndexOffset.dx + details.delta.dx > 0) {
                       _setVideoStartPosition(details);
@@ -380,29 +378,29 @@ class _VideoEditorState extends State<VideoEditorWidget> {
                           margin: EdgeInsets.fromLTRB(
                               _startIndexOffset.dx, 0, 0, 0),
                           color: widget.dragOutterColor,
-                          width: widget.dragWidth,
+                          width: widget.dragStrokeWidth,
                           height: _thumbHeight,
                           alignment: Alignment(0, 0),
                           child: Container(
-                              width: Dimen.w_4,
-                              height: Dimen.w_64,
+                              width: 2,
+                              height: _thumbHeight / 2,
                               color: widget.dragInnerColor),
                         ),
                         Container(
                           margin: EdgeInsets.fromLTRB(
-                              _endIndeOffset.dx - widget.dragWidth < 0
+                              _endIndeOffset.dx - widget.dragStrokeWidth < 0
                                   ? 0
-                                  : _endIndeOffset.dx - widget.dragWidth,
+                                  : _endIndeOffset.dx - widget.dragStrokeWidth,
                               0,
                               0,
                               0),
                           color: widget.dragOutterColor,
-                          width: widget.dragWidth,
+                          width: widget.dragStrokeWidth,
                           height: _thumbHeight,
                           alignment: Alignment(0, 0),
                           child: Container(
-                              width: Dimen.w_4,
-                              height: Dimen.w_64,
+                              width: 2,
+                              height: _thumbHeight / 2,
                               color: widget.dragInnerColor),
                         ),
                         Container(
@@ -410,13 +408,13 @@ class _VideoEditorState extends State<VideoEditorWidget> {
                                 _startIndexOffset.dx, 0, 0, 0),
                             color: widget.dragOutterColor,
                             width: (_endIndeOffset.dx - _startIndexOffset.dx),
-                            height: Dimen.h_6),
+                            height: widget.littleStrokeWidth),
                         Container(
                             margin: EdgeInsets.fromLTRB(_startIndexOffset.dx,
-                                _thumbHeight - Dimen.h_6, 0, 0),
+                                _thumbHeight - widget.littleStrokeWidth, 0, 0),
                             color: widget.dragOutterColor,
                             width: (_endIndeOffset.dx - _startIndexOffset.dx),
-                            height: Dimen.h_6),
+                            height: widget.littleStrokeWidth),
                       ],
                     ))),
             viewModelBuilder: () => editorViewModel)

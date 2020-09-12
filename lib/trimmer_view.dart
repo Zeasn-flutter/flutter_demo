@@ -14,7 +14,10 @@ import 'package:stacked/stacked.dart';
 class TrimmerView extends StatefulWidget {
   final Trimmer _trimmer;
 
-  TrimmerView(this._trimmer);
+  TrimmerView(this._trimmer){
+
+
+  }
 
   @override
   _TrimmerViewState createState() => _TrimmerViewState();
@@ -124,7 +127,8 @@ class _TrimmerViewState extends State<TrimmerView> {
                   child: VideoEditorWidget(
                     ScreenUtil.screenWidth - (Dimen.w_30 * 2),
                     Dimen.h_158,
-                    dragWidth: Dimen.w_35,
+                    dragStrokeWidth: Dimen.w_35,
+                    littleStrokeWidth: Dimen.h_6,
                     dragInnerColor: Colors.white,
                     dragOutterColor: MyColors.colorIndicatorS,
                     maxEditorMilliSeconds: 15000,
