@@ -11,8 +11,7 @@ class ThumbnailViewer extends StatefulWidget {
   final int numberOfThumbnails;
   final int quality;
 
-  ScrollPhysics scrollPhysics = AlwaysScrollableScrollPhysics();
-  ScrollController scrollController = new ScrollController();
+  Function(double scrollOffse) scrollOffsetBuilder;
 
   @override
   _ThumbnailViewerState createState() => _ThumbnailViewerState();
@@ -24,6 +23,7 @@ class ThumbnailViewer extends StatefulWidget {
     @required this.videoDuration,
     @required this.thumbnailHeight,
     @required this.numberOfThumbnails,
+    @required this.scrollOffsetBuilder,
     @required this.fit,
     this.quality = 75,
   })  : assert(videoFile != null),
@@ -34,16 +34,16 @@ class ThumbnailViewer extends StatefulWidget {
 }
 
 class _ThumbnailViewerState extends State<ThumbnailViewer> {
+  ScrollController scrollController = new ScrollController();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    widget.scrollController.addListener(() {
-      print("=========================" + widget.scrollController.offset.toString());
-//      setState(() {
-//
-//      });
+    scrollController.addListener(() {
+      print("=========================" + scrollController.offset.toString());
+      if (widget.scrollOffsetBuilder != null)
+        widget.scrollOffsetBuilder(scrollController.offset);
     });
   }
 
@@ -56,8 +56,7 @@ class _ThumbnailViewerState extends State<ThumbnailViewer> {
         if (snapshot.hasData) {
           List<Uint8List> _imageBytes = snapshot.data;
           return ListView.builder(
-              controller: widget.scrollController,
-              physics: widget.scrollPhysics,
+              controller: scrollController,
               scrollDirection: Axis.horizontal,
               itemCount: snapshot.data.length,
               itemBuilder: (context, index) {
@@ -72,7 +71,7 @@ class _ThumbnailViewerState extends State<ThumbnailViewer> {
               });
         } else {
           return Container(
-            color: Colors.grey[900],
+            color: Colors.yellowAccent,
             height: widget.thumbnailHeight,
             width: double.maxFinite,
           );
@@ -80,6 +79,8 @@ class _ThumbnailViewerState extends State<ThumbnailViewer> {
       },
     );
   }
+
+  Duration mDuration = const Duration(milliseconds: 450);
 
   Stream<List<Uint8List>> generateThumbnail() async* {
     final String _videoPath = widget.videoFile.path;

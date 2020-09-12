@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_ap/BottomSheetWidget.dart';
 
 class TrimEditorPainter extends CustomPainter {
   /// To define the start offset
@@ -82,14 +81,17 @@ class TrimEditorPainter extends CustomPainter {
   /// * [scrubberPaintColor] for specifying a color to the video
   /// scrubber inside the trim area. By default it is set to
   /// `Colors.white`.
-  ///
+
+  double strokeWidth;
+
   TrimEditorPainter({
     @required this.startPos,
     @required this.endPos,
     @required this.scrubberAnimationDx,
-    this.circleSize = 0.5,
-    this.borderWidth = 5,
+    this.circleSize = 12,
+    this.borderWidth = 2,
     this.scrubberWidth = 1,
+    this.strokeWidth = 16,
     this.showScrubber = true,
     this.borderPaintColor = Colors.white,
     this.circlePaintColor = Colors.white,
@@ -113,9 +115,14 @@ class TrimEditorPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
+    var secondBorderPaint = Paint()
+      ..color = Colors.greenAccent
+      ..strokeWidth = 16
+      ..style = PaintingStyle.stroke;
+
     var circlePaint = Paint()
-      ..color = circlePaintColor
-      ..strokeWidth = 1
+      ..color = Colors.brown
+      ..strokeWidth = 30
       ..style = PaintingStyle.fill
       ..strokeCap = StrokeCap.round;
 
@@ -125,7 +132,13 @@ class TrimEditorPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    final rect = Rect.fromPoints(startPos, endPos);
+    Rect rect = Rect.fromPoints(startPos, endPos);
+
+    Offset leftTop = Offset(startPos.dx, startPos.dy);
+    Offset leftBottom = Offset(startPos.dx, endPos.dy);
+
+    Offset rightTop = Offset(endPos.dx, startPos.dy);
+    Offset rightBottom = Offset(endPos.dx, endPos.dy);
 
     if (showScrubber) {
       if (scrubberAnimationDx.toInt() > startPos.dx.toInt()) {
@@ -137,11 +150,14 @@ class TrimEditorPainter extends CustomPainter {
       }
     }
 
-    canvas.drawRect(rect, borderPaint);
-    canvas.drawCircle(
-        startPos + Offset(0, endPos.dy / 2), circleSize, circlePaint);
-    canvas.drawCircle(
-        endPos + Offset(0, -endPos.dy / 2), circleSize, circlePaint);
+//    canvas.drawRect(rect, borderPaint);
+    canvas.drawLine(leftTop, leftBottom, secondBorderPaint);
+    canvas.drawLine(rightTop, rightBottom, secondBorderPaint);
+//    double circleSizess = 20;
+//    canvas.drawCircle(
+//        startPos + Offset(0, endPos.dy / 2), circleSizess, circlePaint);
+//    canvas.drawCircle(
+//        endPos + Offset(0, -endPos.dy / 2), circleSizess, circlePaint);
   }
 
   @override
