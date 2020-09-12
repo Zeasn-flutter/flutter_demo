@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_ap/video_trimmer/trim_editor.dart';
 import 'package:flutter_ap/video_trimmer/video_trimmer.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stacked/stacked.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -209,6 +210,8 @@ class _VideoEditorState extends State<VideoEditorWidget> {
     for (int i = 1; i <= _numberOfThumbnails; i++) {
       Uint8List _bytes;
       _bytes = await VideoThumbnail.thumbnailData(
+        maxWidth: (_thumbHeight * ScreenUtil.pixelRatio).toInt(),
+        maxHeight: (_thumbHeight * ScreenUtil.pixelRatio).toInt(),
         video: _videoPath,
         imageFormat: ImageFormat.JPEG,
         timeMs: (_eachPart * i).toInt(),
@@ -223,7 +226,8 @@ class _VideoEditorState extends State<VideoEditorWidget> {
     if (!(_startIndexOffset.dx + details.delta.dx < 0) &&
         !(_startIndexOffset.dx + details.delta.dx >
             _thumbGalleryScrolloffset) &&
-        !(_startIndexOffset.dx + details.delta.dx > _endIndeOffset.dx)) {
+        !(_startIndexOffset.dx + details.delta.dx + widget.dragStrokeWidth * 2 >
+            _endIndeOffset.dx)) {
       if (maxEditLengthPixels != null) {
         if (!(_endIndeOffset.dx - _startIndexOffset.dx - details.delta.dx >
             maxEditLengthPixels)) {
@@ -259,9 +263,14 @@ class _VideoEditorState extends State<VideoEditorWidget> {
   }
 
   void _setVideoEndPosition(DragUpdateDetails details) async {
+    print('end==' +
+        (_endIndeOffset.dx + details.delta.dx).toString() +
+        " ,start==" +
+        _startIndexOffset.dx.toString());
     if (!(_endIndeOffset.dx + details.delta.dx > widget.width) &&
         !(_endIndeOffset.dx + details.delta.dx < 0) &&
-        !(_endIndeOffset.dx + details.delta.dx < _startIndexOffset.dx)) {
+        !(_endIndeOffset.dx + details.delta.dx - widget.dragStrokeWidth * 2 <
+            _startIndexOffset.dx)) {
       if (maxEditLengthPixels != null) {
         if (!(_endIndeOffset.dx - _startIndexOffset.dx + details.delta.dx >
             maxEditLengthPixels)) {
@@ -310,7 +319,7 @@ class _VideoEditorState extends State<VideoEditorWidget> {
                           width: _thumbHeight,
                           child: Image(
                             image: MemoryImage(_imageBytes[index]),
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fill,
                           ),
                         );
                       });
